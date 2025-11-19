@@ -1,93 +1,93 @@
-# helm-to-yaml
+# Helm to YAML Converter
 
-
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.com/veeam_scripts/helm-to-yaml.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://gitlab.com/veeam_scripts/helm-to-yaml/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
+A bash script that converts Helm install commands with `--set` parameters into clean, readable YAML values files. Specifically designed for Kasten K10 deployments but can be adapted for other Helm charts.
 
 ## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+This tool simplifies the process of managing Helm chart configurations by converting long, unwieldy `helm install` commands with multiple `--set` flags into well-structured YAML values files. Instead of maintaining complex command-line arguments, you can generate a reusable values file that's easier to version control, review, and maintain.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Features
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+- **Automatic parsing**: Extracts all `--set` parameters from Helm commands
+- **Nested structure support**: Properly handles dot-notation keys (e.g., `auth.tokenAuth.enabled=true`)
+- **Type detection**: Automatically identifies and formats booleans, numbers, and strings
+- **Clean YAML output**: Generates properly indented, readable YAML files
+- **Comma-separated values**: Handles multiple values in a single `--set` parameter
+- **Ready to use**: Generated file includes usage instructions as comments
+
+## Requirements
+
+- Bash shell
+- Python 3 (used for reliable YAML generation)
+- Helm (for using the generated values file)
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+1. Make the script executable:
+   ```bash
+   chmod +x helm-to-yaml.sh
+   ```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+2. Run the script:
+   ```bash
+   ./helm-to-yaml.sh
+   ```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+3. Paste your Helm install command when prompted (e.g., from install.kasten.io)
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+4. Press `Ctrl+D` when done
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+5. The script will generate `kasten-values.yml` in the current directory
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### Example
+
+**Input:**
+```bash
+helm install k10 kasten/k10 --namespace=kasten-io \
+  --set auth.tokenAuth.enabled=true \
+  --set prometheus.server.enabled=false \
+  --set ingress.create=true \
+  --set ingress.host=kasten.example.com
+```
+
+**Output** (`kasten-values.yml`):
+```yaml
+# Kasten K10 Values File  
+# Generated on November 19, 2025
+# Use with: helm install k10 kasten/k10 --namespace=kasten-io -f kasten-values.yml
+
+auth:
+  tokenAuth:
+    enabled: true
+prometheus:
+  server:
+    enabled: false
+ingress:
+  create: true
+  host: kasten.example.com
+```
+
+**Install with generated file:**
+```bash
+helm install k10 kasten/k10 --namespace=kasten-io -f kasten-values.yml
+```
+
+## How It Works
+
+1. Reads the Helm install command from standard input
+2. Extracts all `--set` parameters using regex patterns
+3. Handles both quoted and unquoted parameter values
+4. Uses Python to parse key-value pairs and build nested dictionary structure
+5. Outputs properly formatted YAML with correct indentation and type handling
+
+## Benefits
+
+- **Version Control**: YAML files are easier to track in Git than long command lines
+- **Code Review**: Team members can easily review configuration changes
+- **Reusability**: Use the same values file across multiple environments with minor modifications
+- **Documentation**: The YAML structure is self-documenting and easier to understand
+- **Consistency**: Reduces errors from manually typing long Helm commands
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Open source - free to use and modify.
